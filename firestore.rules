@@ -1,0 +1,125 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: projects
+    // Fields:
+    //   - title: string (required, 1-100 chars)
+    //   - location: string (required, 1-100 chars)
+    //   - cost: string (required, 1-50 chars)
+    //   - area: string (optional, 1-50 chars)
+    //   - year: string (optional, 4 chars)
+    //   - description: string (required, 1-2000 chars)
+    //   - images: list (required, max 10 items)
+    //   - category: string (required, enum)
+    //   - createdAt: timestamp (required)
+    //   - updatedAt: timestamp (required)
+    //
+    // Collection: leads
+    // Fields:
+    //   - name: string (required, 1-100 chars)
+    //   - email: string (required, email format)
+    //   - phone: string (optional, 1-20 chars)
+    //   - budget: string (optional, 1-50 chars)
+    //   - serviceType: string (required, enum)
+    //   - message: string (required, 1-1000 chars)
+    //   - status: string (required, enum: new, contacted, closed)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: users
+    // Fields:
+    //   - email: string (required, email format)
+    //   - role: string (required, enum: admin, user)
+    //   - displayName: string (optional, 1-100 chars)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "ankitkumar999090@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidProject(data) {
+      let allowedCategories = ['Commercial', 'Infrastructure', 'Industrial', 'Urban Development', 'Civic Infrastructure'];
+      return hasRequiredFields(['title', 'location', 'cost', 'description', 'images', 'category', 'createdAt', 'updatedAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 100 &&
+             data.location is string && data.location.size() > 0 && data.location.size() <= 100 &&
+             data.cost is string && data.cost.size() > 0 && data.cost.size() <= 50 &&
+             data.description is string && data.description.size() > 0 && data.description.size() <= 2000 &&
+             data.images is list && data.images.size() <= 10 &&
+             data.category in allowedCategories &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+
+    function isValidLead(data) {
+      let allowedStatuses = ['new', 'contacted', 'closed'];
+      let allowedServices = ['Commercial', 'Infrastructure', 'Industrial', 'Design', 'Consulting'];
+      return hasRequiredFields(['name', 'email', 'message', 'status', 'serviceType', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             isValidEmail(data.email) &&
+             data.message is string && data.message.size() > 0 && data.message.size() <= 1000 &&
+             data.status in allowedStatuses &&
+             data.serviceType in allowedServices &&
+             data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /projects/{projectId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidProject(request.resource.data);
+      allow update: if isAdmin() && isValidProject(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /leads/{leadId} {
+      allow read: if isAdmin();
+      allow create: if isValidLead(request.resource.data);
+      allow update: if isAdmin() && isValidLead(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

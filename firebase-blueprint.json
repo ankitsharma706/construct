@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "A construction project managed by CONSTRUCT.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The name of the project." },
+        "location": { "type": "string", "description": "The city and state/country." },
+        "cost": { "type": "string", "description": "The project valuation (e.g., ₹4,200 Cr)." },
+        "area": { "type": "string", "description": "The total area of the project." },
+        "year": { "type": "string", "description": "The completion or start year." },
+        "description": { "type": "string", "description": "Detailed project description." },
+        "images": { "type": "array", "items": { "type": "string" }, "description": "List of image URLs." },
+        "category": { "type": "string", "description": "The type of project (e.g., Infrastructure, Residential)." },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "location", "cost", "description", "category"]
+    },
+    "ContactLead": {
+      "title": "Contact Lead",
+      "description": "A lead generated from the contact form.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "serviceType": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["new", "contacted", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "message"]
+    },
+    "User": {
+      "title": "User",
+      "description": "A user of the application, potentially an admin.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "displayName": { "type": "string" }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Collection of construction projects."
+    },
+    "/leads/{leadId}": {
+      "schema": "ContactLead",
+      "description": "Collection of contact form inquiries."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and roles."
+    }
+  }
+}
