@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
   // API routes
   app.get("/api/health", (req, res) => {
@@ -30,8 +30,18 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
+  });
+
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`Port ${PORT} is in use, trying ${Number(PORT) + 1}...`);
+      process.env.PORT = (Number(PORT) + 1).toString();
+      startServer();
+    } else {
+      console.error(err);
+    }
   });
 }
 
