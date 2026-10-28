@@ -80,10 +80,13 @@ const ArticlePage = () => {
         {/* Content */}
         <div className="max-w-3xl mx-auto">
           <div className="space-y-12 mb-20">
-            {post.content?.map((paragraph, i) => (
-              <p key={i} className="text-xl font-light text-espresso/80 leading-relaxed first-letter:text-5xl first-letter:font-serif first-letter:mr-3 first-letter:float-left first-letter:text-gold">
-                {paragraph}
-              </p>
+            {post.sections?.map((section, i) => (
+              <div key={i} className="space-y-4">
+                <h2 className="text-2xl font-serif text-espresso">{section.title}</h2>
+                <p className="text-xl font-light text-espresso/80 leading-relaxed first-letter:text-5xl first-letter:font-serif first-letter:mr-3 first-letter:float-left first-letter:text-gold">
+                  {section.content}
+                </p>
+              </div>
             ))}
           </div>
 

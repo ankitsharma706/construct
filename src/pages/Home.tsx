@@ -6,10 +6,16 @@ import Process from '../components/Process';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Cpu, Leaf, Building2, TrendingUp } from 'lucide-react';
 import { JOURNAL_POSTS } from '../constants';
+import { SEOHead } from '../lib/seo';
 
 export default function Home() {
   return (
     <div className="bg-cream">
+      <SEOHead
+        title="CONSTRUCT | Structural Engineering & Architectural Design"
+        description="CONSTRUCT is an internationally recognized structural engineering and architecture consultancy. We build high-performance commercial towers, seismic-isolated structures, and urban infrastructure."
+        canonical="/"
+      />
       <Hero />
       
       {/* Services Section */}

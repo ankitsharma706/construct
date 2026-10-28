@@ -1,27 +1,32 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SmoothScroll from './components/SmoothScroll';
-import { useEffect } from 'react';
+import { useAdSenseRouteSync } from './lib/adGuard';
 
-// Lazy load pages
+// Lazy load core pages
 const Home = lazy(() => import('./pages/Home'));
 const ProjectList = lazy(() => import('./pages/ProjectList'));
 const ProjectPage = lazy(() => import('./pages/ProjectPage'));
+const ServicesPage = lazy(() => import('./pages/ServicesPage'));
 const About = lazy(() => import('./pages/About'));
 const Journal = lazy(() => import('./pages/Journal'));
 const JournalDetail = lazy(() => import('./pages/JournalDetail'));
 const Contact = lazy(() => import('./pages/Contact'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 const Login = lazy(() => import('./pages/Login'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
 
-function ScrollToTop() {
+function RouteController() {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+  useAdSenseRouteSync();
   return null;
 }
 
@@ -39,7 +44,7 @@ function LoadingScreen() {
 export default function App() {
   return (
     <Router>
-      <ScrollToTop />
+      <RouteController />
       <SmoothScroll>
         <div className="flex flex-col min-h-screen bg-cream">
           <Navbar />
@@ -49,10 +54,13 @@ export default function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/projects" element={<ProjectList />} />
                 <Route path="/projects/:id" element={<ProjectPage />} />
+                <Route path="/services" element={<ServicesPage />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/journal" element={<Journal />} />
                 <Route path="/journal/:id" element={<JournalDetail />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/login" element={<Login />} />
                 <Route 
                   path="/admin" 
@@ -62,6 +70,8 @@ export default function App() {
                     </ProtectedRoute>
                   } 
                 />
+                {/* 404 Catch-All Route */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </main>
