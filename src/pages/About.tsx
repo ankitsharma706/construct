@@ -1,6 +1,8 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import { useRef } from 'react';
 import { ShieldCheck, Award, Globe, Building2 } from 'lucide-react';
+import { SEOHead } from '../lib/seo';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function About() {
   const containerRef = useRef(null);
@@ -19,8 +21,15 @@ export default function About() {
   const scaleHero = useTransform(heroProgress, [0, 1], [1, 1.2]);
 
   return (
-    <div ref={containerRef} className="bg-cream pt-40 pb-32 px-6 md:px-12 relative overflow-hidden">
+    <div ref={containerRef} className="bg-cream pt-36 pb-32 px-6 md:px-12 relative overflow-hidden">
+      <SEOHead
+        title="About CONSTRUCT Engineering"
+        description="Over three decades of precision structural engineering, seismic innovation, and landmark architecture across global metropolises."
+        canonical="/about"
+        breadcrumbs={[{ name: 'About', url: '/about' }]}
+      />
       <div className="max-w-7xl mx-auto">
+        <Breadcrumbs items={[{ name: 'About Us', url: '/about' }]} />
         
         {/* Cinematic Header */}
         <motion.div 

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Link } from 'react-router-dom';
+import { SEOHead } from '../lib/seo';
 
 type Tab = 'projects' | 'journal' | 'leads';
 
@@ -138,6 +139,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-cream flex flex-col lg:flex-row">
+      <SEOHead title="Control Tower" noindex={true} />
       {/* Sidebar - Desktop Only */}
       <aside className="w-72 bg-espresso text-cream p-10 hidden lg:flex flex-col justify-between fixed h-full z-10">
         <div className="space-y-16">
