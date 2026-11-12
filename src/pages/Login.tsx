@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { SEOHead } from '../lib/seo';
 
 export default function Login() {
   const { login, user, isAdmin, loading: authLoading } = useAuth();
@@ -39,6 +40,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center p-6 relative overflow-hidden">
+      <SEOHead title="Vault Access" noindex={true} />
       {/* Background Architectural Patterns */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
          <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'radial-gradient(circle, #2C2420 1px, transparent 1px)', backgroundSize: '40px 40px' }} />

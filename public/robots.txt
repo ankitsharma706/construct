@@ -1,0 +1,21 @@
+# Mediapartners-Google crawler for AdSense verification and targeting
+User-agent: Mediapartners-Google
+Allow: /
+
+# Googlebot general crawl rules
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /api/
+
+# General crawler access
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /api/
+
+# Host and Sitemap
+Host: https://maxcnfront.vercel.app
+Sitemap: https://maxcnfront.vercel.app/sitemap.xml

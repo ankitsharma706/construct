@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, MapPin, Phone, Mail, Instagram, Linkedin, Twitter } from 'lucide-react';
+import { ArrowRight, MapPin, Phone, Mail, Instagram, Linkedin, Twitter, Clock, ShieldCheck } from 'lucide-react';
 import { leadService } from '../services/firebaseService';
+import { SEOHead } from '../lib/seo';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -37,50 +39,87 @@ export default function Contact() {
   };
 
   return (
-    <div className="bg-cream pt-40 pb-32 px-6 md:px-12">
+    <div className="bg-cream pt-36 pb-32 px-6 md:px-12">
+      <SEOHead
+        title="Contact Engineering Directorate"
+        description="Initiate architectural design, structural engineering review, or geotechnical inquiry with the CONSTRUCT corporate engineering offices in Mumbai."
+        canonical="/contact"
+        breadcrumbs={[{ name: 'Contact', url: '/contact' }]}
+      />
+
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
+        <Breadcrumbs items={[{ name: 'Contact', url: '/contact' }]} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 mt-8">
           {/* Left Content */}
           <div className="lg:col-span-5 space-y-12">
             <div className="space-y-6">
               <h2 className="text-gold text-xs uppercase tracking-[0.3em] font-bold">Contact Us</h2>
-              <h3 className="text-5xl md:text-8xl font-serif text-espresso leading-tight text-balance">
+              <h1 className="text-5xl md:text-8xl font-serif text-espresso leading-tight text-balance">
                 Start Your <br />
                 <span className="italic text-gold">Project</span>
-              </h3>
+              </h1>
             </div>
             <p className="text-xl text-espresso/60 leading-relaxed font-light">
-              We are ready to discuss your vision and how we can bring it to life with precision and excellence.
+              We are ready to discuss your vision and how our multidisciplinary structural engineering directors can bring it to life with precision and structural resilience.
             </p>
 
             <div className="space-y-8 pt-12 border-t border-espresso/5">
               <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-linen rounded-full flex items-center justify-center text-gold"><MapPin size={20} /></div>
+                <div className="w-12 h-12 bg-linen rounded-full flex items-center justify-center text-gold flex-shrink-0"><MapPin size={20} /></div>
                 <div className="space-y-2">
                   <h4 className="text-xs uppercase tracking-widest font-bold text-espresso">Main Office</h4>
-                  <p className="text-sm text-espresso/60 leading-relaxed font-light">Bandra Kurla Complex, Mumbai, India</p>
+                  <p className="text-sm text-espresso/60 leading-relaxed font-light">Bandra Kurla Complex, Mumbai, Maharashtra 400051, India</p>
                 </div>
               </div>
               <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-linen rounded-full flex items-center justify-center text-gold"><Phone size={20} /></div>
+                <div className="w-12 h-12 bg-linen rounded-full flex items-center justify-center text-gold flex-shrink-0"><Phone size={20} /></div>
                 <div className="space-y-2">
                   <h4 className="text-xs uppercase tracking-widest font-bold text-espresso">Phone</h4>
-                  <p className="text-sm text-espresso/60 leading-relaxed font-light">+91 98765 43210</p>
+                  <p className="text-sm text-espresso/60 leading-relaxed font-light">
+                    <a href="tel:+919876543210" className="hover:text-gold transition-colors">+91 98765 43210</a>
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-linen rounded-full flex items-center justify-center text-gold"><Mail size={20} /></div>
+                <div className="w-12 h-12 bg-linen rounded-full flex items-center justify-center text-gold flex-shrink-0"><Mail size={20} /></div>
                 <div className="space-y-2">
                   <h4 className="text-xs uppercase tracking-widest font-bold text-espresso">Email</h4>
-                  <p className="text-sm text-espresso/60 leading-relaxed font-light">projects@construct.com</p>
+                  <p className="text-sm text-espresso/60 leading-relaxed font-light">
+                    <a href="mailto:projects@construct.com" className="hover:text-gold transition-colors underline underline-offset-4">projects@construct.com</a>
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-6 pt-12">
-              <a href="#" className="w-10 h-10 rounded-full border border-espresso/10 flex items-center justify-center hover:bg-gold hover:border-gold hover:text-cream transition-all"><Instagram size={18} /></a>
-              <a href="#" className="w-10 h-10 rounded-full border border-espresso/10 flex items-center justify-center hover:bg-gold hover:border-gold hover:text-cream transition-all"><Linkedin size={18} /></a>
-              <a href="#" className="w-10 h-10 rounded-full border border-espresso/10 flex items-center justify-center hover:bg-gold hover:border-gold hover:text-cream transition-all"><Twitter size={18} /></a>
+            <div className="flex gap-6 pt-8 border-t border-espresso/5">
+              <a
+                href="https://instagram.com/construct_infra"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="w-10 h-10 rounded-full border border-espresso/10 flex items-center justify-center hover:bg-gold hover:border-gold hover:text-cream transition-all"
+              >
+                <Instagram size={18} />
+              </a>
+              <a
+                href="https://linkedin.com/company/construct-engineering"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="w-10 h-10 rounded-full border border-espresso/10 flex items-center justify-center hover:bg-gold hover:border-gold hover:text-cream transition-all"
+              >
+                <Linkedin size={18} />
+              </a>
+              <a
+                href="https://twitter.com/construct_eng"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+                className="w-10 h-10 rounded-full border border-espresso/10 flex items-center justify-center hover:bg-gold hover:border-gold hover:text-cream transition-all"
+              >
+                <Twitter size={18} />
+              </a>
             </div>
           </div>
 
