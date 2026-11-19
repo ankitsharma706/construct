@@ -2,7 +2,7 @@
 
 **Audited branch:** `google_princepal_adsence_seo`
 **Audited commit:** `6f9d757bc4ab149107b29415e3a38755b6ab7f46`
-**Report branch:** `audit/code-review-report`  
+**Report branch:** `audit/code-review-report`
 **GitHub issues:** 45 opened, #3–#47
 
 ## Executive Summary
