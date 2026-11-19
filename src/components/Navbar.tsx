@@ -87,6 +87,10 @@ export default function Navbar() {
 
         {/* Mobile Toggle */}
         <button 
+          type="button"
+          aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={isOpen}
+          aria-controls="mobile-navigation"
           className="md:hidden text-espresso p-2"
           onClick={() => setIsOpen(!isOpen)}
         >
@@ -95,14 +99,16 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="absolute top-full left-0 w-full bg-cream border-t border-espresso/10 p-10 md:hidden shadow-2xl overflow-hidden"
-          >
+      <div id="mobile-navigation">
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              aria-label="Mobile navigation"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="absolute top-full left-0 w-full bg-cream border-t border-espresso/10 p-10 md:hidden shadow-2xl overflow-hidden"
+            >
             <div className="flex flex-col gap-10">
               {navLinks.map((link) => (
                 <Link 
@@ -149,9 +155,10 @@ export default function Navbar() {
                 Assemble Team
               </Link>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </nav>
   );
 }

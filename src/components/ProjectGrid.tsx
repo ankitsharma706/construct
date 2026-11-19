@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { projectService } from '../services/firebaseService';
 import { Project } from '../types';
 import { PROJECTS } from '../constants';
+import OptimizedImage from './OptimizedImage';
 import { Search, Filter, ArrowRight } from 'lucide-react';
 
 const ProjectGrid = () => {
@@ -15,18 +16,17 @@ const ProjectGrid = () => {
 
   useEffect(() => {
     const fetchProjects = async () => {
-      // Try to fetch from Firestore
-      const data = await projectService.getAll();
-      // Combine with constants and remove duplicates by ID
-      const combined = [...data];
-      PROJECTS.forEach(p => {
-        if (!combined.find(item => item.id === p.id)) {
-          combined.push(p);
-        }
-      });
-      setProjects(combined);
-      setFilteredProjects(combined);
-      setLoading(false);
+      try {
+        const data = await projectService.getAll();
+        setProjects(data);
+        setFilteredProjects(data);
+      } catch (error) {
+        console.error('Unable to load published projects; showing the checked-in portfolio.', error);
+        setProjects(PROJECTS);
+        setFilteredProjects(PROJECTS);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchProjects();
   }, []);
@@ -106,14 +106,14 @@ const ProjectGrid = () => {
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 className="group"
               >
-                <Link to={`/project/${project.id}`} className="block space-y-8">
+                <Link to={`/projects/${project.id}`} className="block space-y-8">
                   <div className="aspect-[4/5] bg-linen overflow-hidden relative">
-                    <img
+                    <OptimizedImage
                       src={project.images[0]}
                       alt={project.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
-                      referrerPolicy="no-referrer"
+                      aspectRatio="4/5"
+                      className="w-full h-full"
+                      imageClassName="grayscale group-hover:grayscale-0 group-hover:scale-110 transition-transform duration-1000"
                     />
                     <div className="absolute inset-0 bg-espresso/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
                       <div className="px-8 py-4 bg-cream text-espresso text-[10px] uppercase tracking-widest font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">

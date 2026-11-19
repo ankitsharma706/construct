@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Leaf, Recycle, Zap, Droplets } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 const Sustainability = () => {
   const points = [
@@ -22,11 +23,12 @@ const Sustainability = () => {
               transition={{ duration: 1 }}
               className="relative aspect-[4/5] bg-linen overflow-hidden"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1518005020251-58296b8a76ff?auto=format&fit=crop&q=80&w=1000" 
-                alt="Sustainable Architecture" 
-                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
-                referrerPolicy="no-referrer"
+              <OptimizedImage
+                src="https://images.unsplash.com/photo-1518005020251-58296b8a76ff?auto=format&fit=crop&q=80&w=1000"
+                alt="Sustainable building design"
+                aspectRatio="4/5"
+                className="w-full h-full"
+                imageClassName="grayscale hover:grayscale-0 transition-transform duration-1000"
               />
               <div className="absolute bottom-0 left-0 w-full p-10 bg-gradient-to-t from-espresso/80 to-transparent">
                 <div className="text-emerald text-xs uppercase tracking-[0.3em] font-bold">Green Initiative</div>

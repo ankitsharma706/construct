@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '..');
 const PUBLIC_DIR = path.resolve(ROOT_DIR, 'public');
 
-const SITE_URL = process.env.VITE_SITE_URL || 'https://maxcnfront.vercel.app';
+const SITE_URL = (process.env.VITE_SITE_URL || 'https://maxcnfront.vercel.app').replace(/\/+$/, '');
 
 interface SitemapRoute {
   path: string;
@@ -29,7 +29,6 @@ const staticRoutes: SitemapRoute[] = [
 ];
 
 function generateSitemap(): string {
-  const currentDate = new Date().toISOString().split('T')[0];
   const allRoutes: SitemapRoute[] = [...staticRoutes];
 
   // Add Dynamic Projects
@@ -38,7 +37,6 @@ function generateSitemap(): string {
       path: `/projects/${project.id}`,
       changefreq: 'monthly',
       priority: '0.8',
-      lastmod: currentDate,
     });
   }
 
@@ -48,20 +46,20 @@ function generateSitemap(): string {
       path: `/journal/${post.id}`,
       changefreq: 'monthly',
       priority: '0.8',
-      lastmod: currentDate,
     });
   }
 
   const xmlEntries = allRoutes
     .map((route) => {
       const loc = `${SITE_URL}${route.path}`;
-      const lastmod = route.lastmod || currentDate;
-      return `  <url>
-    <loc>${loc}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${route.changefreq}</changefreq>
-    <priority>${route.priority}</priority>
-  </url>`;
+      return [
+        '  <url>',
+        `    <loc>${loc}</loc>`,
+        ...(route.lastmod ? [`    <lastmod>${route.lastmod}</lastmod>`] : []),
+        `    <changefreq>${route.changefreq}</changefreq>`,
+        `    <priority>${route.priority}</priority>`,
+        '  </url>',
+      ].join('\n');
     })
     .join('\n');
 
@@ -94,8 +92,7 @@ Disallow: /admin
 Disallow: /login
 Disallow: /api/
 
-# Host and Sitemap
-Host: ${SITE_URL}
+# Sitemap
 Sitemap: ${SITE_URL}/sitemap.xml
 `;
 }
@@ -117,4 +114,3 @@ function run() {
 }
 
 run();
-

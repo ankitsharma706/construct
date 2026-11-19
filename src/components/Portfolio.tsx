@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { projectService } from '../services/firebaseService';
 import { Project } from '../types';
 import { PROJECTS } from '../constants';
+import OptimizedImage from './OptimizedImage';
 
 const Portfolio = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -12,12 +13,12 @@ const Portfolio = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = projectService.subscribeAll((data) => {
-      if (data.length > 0) {
-        setProjects(data);
-      } else {
-        setProjects(PROJECTS.slice(0, 5));
-      }
+    const unsub = projectService.subscribePublished((data) => {
+      setProjects(data.slice(0, 5));
+      setLoading(false);
+    }, (error) => {
+      console.error('Unable to subscribe to published projects; showing the static portfolio.', error);
+      setProjects(PROJECTS.slice(0, 5));
       setLoading(false);
     });
     return () => unsub();
@@ -57,17 +58,22 @@ const Portfolio = () => {
         <div className="flex flex-col lg:flex-row gap-20 items-center">
           <div className="w-full lg:w-3/5 aspect-[4/3] relative overflow-hidden">
             <AnimatePresence mode="wait">
-              <motion.img
+              <motion.div
                 key={project.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.8 }}
-                src={project.images[0]}
-                alt={project.title}
-                className="w-full h-full object-cover grayscale"
-                referrerPolicy="no-referrer"
-              />
+                className="w-full h-full"
+              >
+                <OptimizedImage
+                  src={project.images[0]}
+                  alt={project.title}
+                  aspectRatio="4/3"
+                  className="w-full h-full"
+                  imageClassName="grayscale"
+                />
+              </motion.div>
             </AnimatePresence>
           </div>
 
@@ -99,7 +105,7 @@ const Portfolio = () => {
                   </div>
                 </div>
 
-                <Link to={`/project/${project.id}`} className="mt-12 group flex items-center space-x-4 text-xs uppercase tracking-[0.2em] font-bold text-espresso">
+                <Link to={`/projects/${project.id}`} className="mt-12 group flex items-center space-x-4 text-xs uppercase tracking-[0.2em] font-bold text-espresso">
                   <span>View Project Details</span>
                   <div className="w-12 h-px bg-espresso group-hover:w-20 transition-all duration-500" />
                 </Link>

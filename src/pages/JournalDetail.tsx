@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, useScroll, useSpring } from 'motion/react';
 import { JOURNAL_POSTS } from '../constants';
@@ -11,10 +11,31 @@ import { SEOHead } from '../lib/seo';
 import Breadcrumbs from '../components/Breadcrumbs';
 import AdSenseSlot from '../components/AdSenseSlot';
 import RelatedContent from '../components/RelatedContent';
+import { journalService } from '../services/firebaseService';
+import OptimizedImage from '../components/OptimizedImage';
 
 export default function JournalDetail() {
   const { id } = useParams();
-  const [post] = useState<JournalPost | null>(JOURNAL_POSTS.find(p => p.id === id) || null);
+  const [post, setPost] = useState<JournalPost | null>(() => JOURNAL_POSTS.find((item) => item.id === id) || null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setPost(JOURNAL_POSTS.find((item) => item.id === id) || null);
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
+    journalService.getById(id).then((record) => {
+      if (active) setPost(record);
+    }).catch((error: unknown) => {
+      console.error(`Unable to load journal article ${id}.`, error);
+    }).finally(() => {
+      if (active) setLoading(false);
+    });
+    return () => { active = false; };
+  }, [id]);
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -22,6 +43,10 @@ export default function JournalDetail() {
     damping: 30,
     restDelta: 0.001
   });
+
+  if (loading && !post) {
+    return <div className="min-h-screen flex items-center justify-center bg-cream" role="status">Loading article…</div>;
+  }
 
   if (!post) {
     return (
@@ -126,10 +151,13 @@ export default function JournalDetail() {
           transition={{ duration: 1.2 }}
           className="aspect-[21/9] overflow-hidden bg-linen relative mb-24 shadow-2xl group"
         >
-          <img 
-            src={post.image} 
-            alt={post.title} 
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+          <OptimizedImage
+            src={post.image}
+            alt={post.title}
+            priority
+            aspectRatio="21/9"
+            className="w-full h-full"
+            imageClassName="grayscale group-hover:grayscale-0 transition-transform duration-1000"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-espresso/30 to-transparent" />
         </motion.div>
@@ -150,10 +178,12 @@ export default function JournalDetail() {
                   {section.image && (
                     <div className="mt-12">
                       <div className="aspect-video overflow-hidden border border-espresso/5 bg-linen shadow-lg group-hover:shadow-2xl transition-all duration-700">
-                        <img
+                        <OptimizedImage
                           src={section.image}
                           alt={section.title}
-                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                          aspectRatio="16/9"
+                          className="w-full h-full"
+                          imageClassName="grayscale group-hover:grayscale-0 group-hover:scale-105 transition-transform duration-700"
                         />
                       </div>
                     </div>
@@ -201,10 +231,12 @@ export default function JournalDetail() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {post.gallery.map((img, i) => (
                     <div key={i} className="aspect-square overflow-hidden bg-linen shadow-md">
-                      <img
+                      <OptimizedImage
                         src={img}
                         alt={`Technical documentation ${i + 1}`}
-                        className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                        aspectRatio="1/1"
+                        className="w-full h-full"
+                        imageClassName="grayscale hover:grayscale-0 transition-transform duration-500"
                       />
                     </div>
                   ))}
@@ -214,7 +246,7 @@ export default function JournalDetail() {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-4 lg:sticky lg:top-36 h-fit space-y-12">
+          <div className="lg:col-span-4 h-fit space-y-12">
             {post.technicalBrief && (
               <div className="bg-linen p-8 border border-espresso/5 space-y-6">
                 <h3 className="text-[10px] uppercase tracking-[0.4em] font-bold text-gold">

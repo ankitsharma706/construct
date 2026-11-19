@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2 } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 const WhyConstructAbout = () => {
   const points = [
@@ -43,11 +44,12 @@ const WhyConstructAbout = () => {
 
           <div className="relative">
             <div className="aspect-square bg-cream relative overflow-hidden shadow-2xl">
-              <img 
-                src="https://images.unsplash.com/photo-1541888946425-d81bb19480c5?auto=format&fit=crop&q=80&w=1000" 
-                alt="Construction Quality" 
-                className="w-full h-full object-cover grayscale"
-                referrerPolicy="no-referrer"
+              <OptimizedImage
+                src="https://images.unsplash.com/photo-1541888946425-d81bb19480c5?auto=format&fit=crop&q=80&w=1000"
+                alt="Quality inspection at a construction site"
+                aspectRatio="1/1"
+                className="w-full h-full"
+                imageClassName="grayscale"
               />
               <div className="absolute inset-0 bg-espresso/20" />
             </div>

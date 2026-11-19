@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { ArrowRight, TrendingUp, ShieldCheck, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import OptimizedImage from './OptimizedImage';
 
 export default function Hero() {
   return (
@@ -71,11 +72,13 @@ export default function Hero() {
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="w-full h-full"
         >
-          <img 
-            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2000" 
-            alt="Modern Infrastructure" 
-            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
-            referrerPolicy="no-referrer"
+          <OptimizedImage
+            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2000"
+            alt="Modern Infrastructure"
+            priority
+            aspectRatio="16/9"
+            className="w-full h-full"
+            imageClassName="grayscale hover:grayscale-0 transition-transform duration-1000"
           />
           <div className="absolute inset-0 bg-espresso/10 mix-blend-multiply" />
         </motion.div>

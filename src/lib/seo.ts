@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export interface BreadcrumbItem {
   name: string;
@@ -32,7 +33,7 @@ export interface SEOMetadata {
 export const SITE_CONFIG = {
   name: 'CONSTRUCT',
   legalName: 'CONSTRUCT Infrastructure & Structural Engineering Private Limited',
-  url: 'https://maxcnfront.vercel.app',
+  url: import.meta.env.VITE_SITE_URL || 'https://maxcnfront.vercel.app',
   defaultTitle: 'CONSTRUCT | Structural Engineering & Architectural Design',
   titleTemplate: '%s | CONSTRUCT Engineering',
   defaultDescription:
@@ -237,8 +238,9 @@ export function SEOHead({
   faqs,
   additionalSchema,
 }: SEOMetadata) {
+  const { pathname } = useLocation();
   const fullTitle = formatTitle(title);
-  const canonicalUrl = resolveCanonicalUrl(canonical);
+  const canonicalUrl = resolveCanonicalUrl(canonical || pathname);
 
   useEffect(() => {
     // 1. Update Title
@@ -271,6 +273,8 @@ export function SEOHead({
     setMeta('description', description);
     if (keywords && keywords.length > 0) {
       setMeta('keywords', keywords.join(', '));
+    } else {
+      document.querySelector('meta[name="keywords"]')?.remove();
     }
     setMeta(
       'robots',
@@ -291,15 +295,16 @@ export function SEOHead({
     setMeta('og:image', ogImage, true);
     setMeta('og:image:alt', ogImageAlt, true);
 
-    if (publishedTime) {
-      setMeta('article:published_time', publishedTime, true);
-    }
-    if (modifiedTime) {
-      setMeta('article:modified_time', modifiedTime, true);
-    }
-    if (author) {
-      setMeta('article:author', author, true);
-    }
+    const setOptionalProperty = (name: string, value?: string) => {
+      if (value) {
+        setMeta(name, value, true);
+      } else {
+        document.querySelector(`meta[property="${name}"]`)?.remove();
+      }
+    };
+    setOptionalProperty('article:published_time', publishedTime);
+    setOptionalProperty('article:modified_time', modifiedTime);
+    setOptionalProperty('article:author', author);
 
     // Twitter Card
     setMeta('twitter:card', twitterCard);
@@ -371,4 +376,3 @@ export function SEOHead({
 
   return null;
 }
-

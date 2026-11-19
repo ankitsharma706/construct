@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'motion/react';
 import { 
@@ -18,25 +18,24 @@ export default function Login() {
 
   const from = location.state?.from?.pathname || "/admin";
 
+  useEffect(() => {
+    if (user && !authLoading && isAdmin) {
+      navigate(from, { replace: true });
+    }
+  }, [authLoading, from, isAdmin, navigate, user]);
+
   const handleLogin = async () => {
     setIsAuthenticating(true);
     setError(null);
     try {
       await login();
       // Navigation is handled by the component's effect or user can click continue
-    } catch (err: any) {
-      setError(err.message || 'Authentication sequence failed.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Authentication sequence failed.');
     } finally {
       setIsAuthenticating(false);
     }
   };
-
-  // Redirect if already logged in and context resolved
-  if (user && !authLoading) {
-    if (isAdmin) {
-      navigate(from, { replace: true });
-    }
-  }
 
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center p-6 relative overflow-hidden">

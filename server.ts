@@ -11,6 +11,19 @@ async function startServer() {
   const app = express();
   const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
+  app.use((_req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://*.google.com https://*.googleapis.com https://*.googlesyndication.com https://fundingchoicesmessages.google.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://firestore.googleapis.com https://www.google-analytics.com https://*.googlesyndication.com https://fundingchoicesmessages.google.com wss://*.firebaseio.com; frame-src 'self' https://*.google.com https://*.firebaseapp.com https://accounts.google.com https://*.googlesyndication.com; media-src 'self' https: blob:;"
+    );
+    next();
+  });
+
   // Serve ads.txt explicitly with text/plain charset=utf-8
   app.get("/ads.txt", (req, res) => {
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
@@ -22,7 +35,8 @@ async function startServer() {
     } else if (fs.existsSync(distPath)) {
       return res.sendFile(distPath);
     }
-    return res.status(200).send("google.com, pub-4318712038607459, DIRECT, f08c47fec0942fa0\n");
+    const publisherId = (process.env.VITE_ADSENSE_PUBLISHER_ID || "ca-pub-4318712038607459").replace(/^ca-/, "");
+    return res.status(200).send(`google.com, ${publisherId}, DIRECT, f08c47fec0942fa0\n`);
   });
 
   // Serve robots.txt explicitly
@@ -59,9 +73,12 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    app.get(["/admin", "/login"], (_req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
+    });
+    app.use(express.static(distPath));
+    app.get("*", (_req, res) => {
+      res.status(404).sendFile(path.join(distPath, "404.html"));
     });
   }
 

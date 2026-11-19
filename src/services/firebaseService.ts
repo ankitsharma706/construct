@@ -1,18 +1,23 @@
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  getDoc, 
-  doc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
+import { FirebaseError } from 'firebase/app';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  DocumentData,
+  DocumentSnapshot,
+  getDoc,
+  getDocs,
+  onSnapshot,
   orderBy,
+  query,
   serverTimestamp,
-  onSnapshot
+  setDoc,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
-import { db, auth } from '../firebase';
-import { Project, ContactLead } from '../types';
+import { appCheck, db } from '../firebase';
+import { ContactLead, JournalPost, Project } from '../types';
 
 enum OperationType {
   CREATE = 'create',
@@ -20,49 +25,53 @@ enum OperationType {
   DELETE = 'delete',
   LIST = 'list',
   GET = 'get',
-  WRITE = 'write',
 }
 
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: {
-    userId: string | undefined;
-    email: string | null | undefined;
-    emailVerified: boolean | undefined;
-    isAnonymous: boolean | undefined;
-    tenantId: string | null | undefined;
-    providerInfo: {
-      providerId: string;
-      displayName: string | null;
-      email: string | null;
-      photoUrl: string | null;
-    }[];
-  }
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string): Error {
+  const code = error instanceof FirebaseError ? error.code : 'unknown';
+  console.error('Firestore operation failed', { operationType, path, code });
+  return new Error(`Firestore ${operationType} failed (${code}).`);
 }
 
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData.map(provider => ({
-        providerId: provider.providerId,
-        displayName: provider.displayName,
-        email: provider.email,
-        photoUrl: provider.photoURL
-      })) || []
-    },
-    operationType,
-    path
+function mapProject(snapshot: DocumentSnapshot<DocumentData>): Project {
+  const data = snapshot.data();
+  if (
+    typeof data.title !== 'string' ||
+    typeof data.location !== 'string' ||
+    typeof data.cost !== 'string' ||
+    typeof data.category !== 'string' ||
+    typeof data.description !== 'string' ||
+    !Array.isArray(data.images)
+  ) {
+    throw new Error(`Invalid project document: ${snapshot.id}`);
   }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  return { ...data, id: snapshot.id } as Project;
+}
+
+function mapJournalPost(snapshot: DocumentSnapshot<DocumentData>): JournalPost {
+  const data = snapshot.data();
+  const validSections = Array.isArray(data.sections) && data.sections.every(
+    (section: unknown) =>
+      typeof section === 'object' &&
+      section !== null &&
+      'title' in section &&
+      typeof section.title === 'string' &&
+      'content' in section &&
+      typeof section.content === 'string',
+  );
+  if (
+    typeof data.title !== 'string' ||
+    typeof data.category !== 'string' ||
+    typeof data.excerpt !== 'string' ||
+    typeof data.date !== 'string' ||
+    typeof data.author !== 'string' ||
+    typeof data.image !== 'string' ||
+    typeof data.readTime !== 'string' ||
+    !validSections
+  ) {
+    throw new Error(`Invalid journal document: ${snapshot.id}`);
+  }
+  return { ...data, id: snapshot.id } as JournalPost;
 }
 
 const PROJECTS_COLLECTION = 'projects';
@@ -70,38 +79,59 @@ const LEADS_COLLECTION = 'leads';
 const JOURNAL_COLLECTION = 'journal';
 
 export const projectService = {
-  async getAll() {
+  async getAll(): Promise<Project[]> {
     try {
-      const q = query(collection(db, PROJECTS_COLLECTION), orderBy('createdAt', 'desc'));
+      const q = query(
+        collection(db, PROJECTS_COLLECTION),
+        where('published', '==', true),
+        orderBy('createdAt', 'desc'),
+      );
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
+      return snapshot.docs.map(mapProject);
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, PROJECTS_COLLECTION);
-      return [];
+      throw handleFirestoreError(error, OperationType.LIST, PROJECTS_COLLECTION);
     }
   },
 
-  subscribeAll(callback: (projects: Project[]) => void) {
+  async getAllForAdmin(): Promise<Project[]> {
+    try {
+      const snapshot = await getDocs(query(collection(db, PROJECTS_COLLECTION), orderBy('createdAt', 'desc')));
+      return snapshot.docs.map(mapProject);
+    } catch (error) {
+      throw handleFirestoreError(error, OperationType.LIST, PROJECTS_COLLECTION);
+    }
+  },
+
+  subscribeAll(callback: (projects: Project[]) => void, onError?: (error: Error) => void) {
     const q = query(collection(db, PROJECTS_COLLECTION), orderBy('createdAt', 'desc'));
     return onSnapshot(q, (snapshot) => {
-      const projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
-      callback(projects);
+      callback(snapshot.docs.map(mapProject));
     }, (error) => {
-      handleFirestoreError(error, OperationType.GET, PROJECTS_COLLECTION);
+      const safeError = handleFirestoreError(error, OperationType.LIST, PROJECTS_COLLECTION);
+      if (onError) onError(safeError);
     });
   },
 
-  async getById(id: string) {
+  subscribePublished(callback: (projects: Project[]) => void, onError?: (error: Error) => void) {
+    const q = query(
+      collection(db, PROJECTS_COLLECTION),
+      where('published', '==', true),
+      orderBy('createdAt', 'desc'),
+    );
+    return onSnapshot(q, (snapshot) => {
+      callback(snapshot.docs.map(mapProject));
+    }, (error) => {
+      const safeError = handleFirestoreError(error, OperationType.LIST, PROJECTS_COLLECTION);
+      if (onError) onError(safeError);
+    });
+  },
+
+  async getById(id: string): Promise<Project | null> {
     try {
-      const docRef = doc(db, PROJECTS_COLLECTION, id);
-      const snapshot = await getDoc(docRef);
-      if (snapshot.exists()) {
-        return { id: snapshot.id, ...snapshot.data() } as Project;
-      }
-      return null;
+      const snapshot = await getDoc(doc(db, PROJECTS_COLLECTION, id));
+      return snapshot.exists() ? mapProject(snapshot) : null;
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, `${PROJECTS_COLLECTION}/${id}`);
-      return null;
+      throw handleFirestoreError(error, OperationType.GET, `${PROJECTS_COLLECTION}/${id}`);
     }
   },
 
@@ -109,118 +139,167 @@ export const projectService = {
     try {
       return await addDoc(collection(db, PROJECTS_COLLECTION), {
         ...project,
+        published: project.published ?? true,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, PROJECTS_COLLECTION);
+      throw handleFirestoreError(error, OperationType.CREATE, PROJECTS_COLLECTION);
     }
   },
 
-  async update(id: string, project: Partial<Project>) {
+  async bootstrap(id: string, project: Omit<Project, 'id'>) {
     try {
-      const docRef = doc(db, PROJECTS_COLLECTION, id);
-      return await updateDoc(docRef, {
+      const matches = await getDocs(query(collection(db, PROJECTS_COLLECTION), where('title', '==', project.title)));
+      const existing = matches.docs.find((document) => document.id === id) || matches.docs[0];
+      await setDoc(existing?.ref || doc(db, PROJECTS_COLLECTION, id), {
         ...project,
-        updatedAt: serverTimestamp()
+        published: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+    } catch (error) {
+      throw handleFirestoreError(error, OperationType.CREATE, `${PROJECTS_COLLECTION}/${id}`);
+    }
+  },
+
+  async update(id: string, project: Partial<Omit<Project, 'id' | 'createdAt'>>) {
+    try {
+      await updateDoc(doc(db, PROJECTS_COLLECTION, id), {
+        ...project,
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `${PROJECTS_COLLECTION}/${id}`);
+      throw handleFirestoreError(error, OperationType.UPDATE, `${PROJECTS_COLLECTION}/${id}`);
     }
   },
 
   async delete(id: string) {
     try {
-      const docRef = doc(db, PROJECTS_COLLECTION, id);
-      return await deleteDoc(docRef);
+      await deleteDoc(doc(db, PROJECTS_COLLECTION, id));
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `${PROJECTS_COLLECTION}/${id}`);
+      throw handleFirestoreError(error, OperationType.DELETE, `${PROJECTS_COLLECTION}/${id}`);
     }
-  }
+  },
 };
 
 export const journalService = {
-  async getAll() {
+  async getAll(): Promise<JournalPost[]> {
     try {
-      const q = query(collection(db, JOURNAL_COLLECTION), orderBy('date', 'desc'));
+      const q = query(
+        collection(db, JOURNAL_COLLECTION),
+        where('published', '==', true),
+        orderBy('date', 'desc'),
+      );
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+      return snapshot.docs.map(mapJournalPost);
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, JOURNAL_COLLECTION);
-      return [];
+      throw handleFirestoreError(error, OperationType.LIST, JOURNAL_COLLECTION);
     }
   },
 
-  subscribeAll(callback: (posts: any[]) => void) {
+  async getAllForAdmin(): Promise<JournalPost[]> {
+    try {
+      const snapshot = await getDocs(query(collection(db, JOURNAL_COLLECTION), orderBy('date', 'desc')));
+      return snapshot.docs.map(mapJournalPost);
+    } catch (error) {
+      throw handleFirestoreError(error, OperationType.LIST, JOURNAL_COLLECTION);
+    }
+  },
+
+  subscribeAll(callback: (posts: JournalPost[]) => void, onError?: (error: Error) => void) {
     const q = query(collection(db, JOURNAL_COLLECTION), orderBy('date', 'desc'));
     return onSnapshot(q, (snapshot) => {
-      const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
-      callback(posts);
+      callback(snapshot.docs.map(mapJournalPost));
     }, (error) => {
-      handleFirestoreError(error, OperationType.GET, JOURNAL_COLLECTION);
+      const safeError = handleFirestoreError(error, OperationType.LIST, JOURNAL_COLLECTION);
+      if (onError) onError(safeError);
     });
   },
 
-  async create(post: any) {
+  async getById(id: string): Promise<JournalPost | null> {
     try {
-      return await addDoc(collection(db, JOURNAL_COLLECTION), {
-        ...post,
-        createdAt: serverTimestamp()
-      });
+      const snapshot = await getDoc(doc(db, JOURNAL_COLLECTION, id));
+      return snapshot.exists() ? mapJournalPost(snapshot) : null;
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, JOURNAL_COLLECTION);
+      throw handleFirestoreError(error, OperationType.GET, `${JOURNAL_COLLECTION}/${id}`);
     }
   },
 
-  async update(id: string, post: any) {
+  async create(post: Omit<JournalPost, 'id'>) {
     try {
-       const docRef = doc(db, JOURNAL_COLLECTION, id);
-       return await updateDoc(docRef, post);
+      return await addDoc(collection(db, JOURNAL_COLLECTION), {
+        ...post,
+        published: post.published ?? true,
+        createdAt: serverTimestamp(),
+      });
     } catch (error) {
-       handleFirestoreError(error, OperationType.UPDATE, `${JOURNAL_COLLECTION}/${id}`);
+      throw handleFirestoreError(error, OperationType.CREATE, JOURNAL_COLLECTION);
+    }
+  },
+
+  async bootstrap(id: string, post: Omit<JournalPost, 'id'>) {
+    try {
+      const matches = await getDocs(query(collection(db, JOURNAL_COLLECTION), where('title', '==', post.title)));
+      const existing = matches.docs.find((document) => document.id === id) || matches.docs[0];
+      await setDoc(existing?.ref || doc(db, JOURNAL_COLLECTION, id), {
+        ...post,
+        published: true,
+        createdAt: serverTimestamp(),
+      }, { merge: true });
+    } catch (error) {
+      throw handleFirestoreError(error, OperationType.CREATE, `${JOURNAL_COLLECTION}/${id}`);
+    }
+  },
+
+  async update(id: string, post: Partial<Omit<JournalPost, 'id' | 'createdAt'>>) {
+    try {
+      await updateDoc(doc(db, JOURNAL_COLLECTION, id), post);
+    } catch (error) {
+      throw handleFirestoreError(error, OperationType.UPDATE, `${JOURNAL_COLLECTION}/${id}`);
     }
   },
 
   async delete(id: string) {
     try {
-      const docRef = doc(db, JOURNAL_COLLECTION, id);
-      return await deleteDoc(docRef);
+      await deleteDoc(doc(db, JOURNAL_COLLECTION, id));
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `${JOURNAL_COLLECTION}/${id}`);
+      throw handleFirestoreError(error, OperationType.DELETE, `${JOURNAL_COLLECTION}/${id}`);
     }
-  }
+  },
 };
 
 export const leadService = {
   async create(lead: Omit<ContactLead, 'id' | 'status' | 'createdAt'>) {
+    if (!appCheck) {
+      throw new Error('Secure form submissions are unavailable until Firebase App Check is configured.');
+    }
     try {
       return await addDoc(collection(db, LEADS_COLLECTION), {
         ...lead,
         status: 'new',
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
       });
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, LEADS_COLLECTION);
+      throw handleFirestoreError(error, OperationType.CREATE, LEADS_COLLECTION);
     }
   },
 
-  async getAll() {
+  async getAll(): Promise<ContactLead[]> {
     try {
       const q = query(collection(db, LEADS_COLLECTION), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ContactLead));
+      return snapshot.docs.map((document) => ({ id: document.id, ...document.data() } as ContactLead));
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, LEADS_COLLECTION);
-      return [];
+      throw handleFirestoreError(error, OperationType.LIST, LEADS_COLLECTION);
     }
   },
 
-  async updateStatus(id: string, status: string) {
+  async updateStatus(id: string, status: ContactLead['status']) {
     try {
-      const docRef = doc(db, LEADS_COLLECTION, id);
-      return await updateDoc(docRef, { status });
+      await updateDoc(doc(db, LEADS_COLLECTION, id), { status });
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `${LEADS_COLLECTION}/${id}`);
+      throw handleFirestoreError(error, OperationType.UPDATE, `${LEADS_COLLECTION}/${id}`);
     }
-  }
+  },
 };

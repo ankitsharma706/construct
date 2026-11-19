@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { JOURNAL_POSTS } from '../constants';
 import { Link } from 'react-router-dom';
@@ -7,10 +7,23 @@ import { cn } from '../lib/utils';
 import { SEOHead } from '../lib/seo';
 import Breadcrumbs from '../components/Breadcrumbs';
 import AdSenseSlot from '../components/AdSenseSlot';
+import OptimizedImage from '../components/OptimizedImage';
+import { journalService } from '../services/firebaseService';
 
 export default function Journal() {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [posts] = useState(JOURNAL_POSTS);
+  const [posts, setPosts] = useState(JOURNAL_POSTS);
+
+  useEffect(() => {
+    let active = true;
+    journalService.getAll().then((publishedPosts) => {
+      if (!active) return;
+      setPosts(publishedPosts.sort((a, b) => b.date.localeCompare(a.date)));
+    }).catch((error: unknown) => {
+      console.error('Unable to load published journal records; showing the static archive.', error);
+    });
+    return () => { active = false; };
+  }, []);
 
   // Derive dynamic categories from available posts to prevent empty screens
   const categories = useMemo(() => {
@@ -65,10 +78,13 @@ export default function Journal() {
             <Link to={`/journal/${featuredPost.id}`} className="group grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
               <div className="lg:col-span-7 relative">
                 <div className="aspect-[16/10] overflow-hidden bg-linen shadow-2xl relative z-10">
-                  <img 
-                    src={featuredPost.image} 
-                    alt={featuredPost.title} 
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000"
+                  <OptimizedImage
+                    src={featuredPost.image}
+                    alt={featuredPost.title}
+                    priority
+                    aspectRatio="16/10"
+                    className="w-full h-full"
+                    imageClassName="grayscale group-hover:grayscale-0 group-hover:scale-105 transition-transform duration-1000"
                   />
                 </div>
               </div>
@@ -138,10 +154,12 @@ export default function Journal() {
                 <Link to={`/journal/${post.id}`} className="group block space-y-8">
                   <div className="relative">
                     <div className="aspect-[4/3] overflow-hidden bg-linen shadow-lg group-hover:shadow-2xl transition-all duration-700">
-                      <img 
-                        src={post.image} 
-                        alt={post.title} 
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                      <OptimizedImage
+                        src={post.image}
+                        alt={post.title}
+                        aspectRatio="4/3"
+                        className="w-full h-full"
+                        imageClassName="grayscale group-hover:grayscale-0 group-hover:scale-105 transition-transform duration-700"
                       />
                     </div>
                     <div className="absolute -bottom-6 -right-6 bg-cream p-4 shadow-xl border border-espresso/5 max-w-[180px] hidden lg:block">

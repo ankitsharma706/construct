@@ -16,10 +16,12 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmissionError(null);
     try {
       await leadService.create(formData);
       setIsSuccess(true);
@@ -33,6 +35,7 @@ export default function Contact() {
       });
     } catch (error) {
       console.error('Error submitting lead:', error);
+      setSubmissionError('Your inquiry could not be sent. Please retry; the information you entered has been kept.');
     } finally {
       setIsSubmitting(false);
     }
@@ -147,8 +150,9 @@ export default function Contact() {
               <form onSubmit={handleSubmit} className="space-y-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="space-y-4">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Full Name</label>
+                    <label htmlFor="lead-name" className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Full Name</label>
                     <input 
+                      id="lead-name"
                       required
                       type="text" 
                       value={formData.name}
@@ -158,8 +162,9 @@ export default function Contact() {
                     />
                   </div>
                   <div className="space-y-4">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Email Address</label>
+                    <label htmlFor="lead-email" className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Email Address</label>
                     <input 
+                      id="lead-email"
                       required
                       type="email" 
                       value={formData.email}
@@ -172,8 +177,9 @@ export default function Contact() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="space-y-4">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Phone Number</label>
+                    <label htmlFor="lead-phone" className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Phone Number</label>
                     <input 
+                      id="lead-phone"
                       type="tel" 
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -182,8 +188,9 @@ export default function Contact() {
                     />
                   </div>
                   <div className="space-y-4">
-                    <label className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Expected Budget</label>
+                    <label htmlFor="lead-budget" className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Expected Budget</label>
                     <input 
+                      id="lead-budget"
                       type="text" 
                       value={formData.budget}
                       onChange={(e) => setFormData({...formData, budget: e.target.value})}
@@ -194,8 +201,9 @@ export default function Contact() {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Service Type</label>
+                  <label htmlFor="lead-service-type" className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Service Type</label>
                   <select 
+                    id="lead-service-type"
                     value={formData.serviceType}
                     onChange={(e) => setFormData({...formData, serviceType: e.target.value})}
                     className="w-full bg-transparent border-b border-espresso/10 py-4 text-espresso focus:border-gold outline-none transition-all font-light appearance-none"
@@ -209,8 +217,9 @@ export default function Contact() {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Project Details</label>
+                  <label htmlFor="lead-message" className="text-[10px] uppercase tracking-widest font-bold text-espresso/40">Project Details</label>
                   <textarea 
+                    id="lead-message"
                     required
                     rows={4}
                     value={formData.message}
@@ -227,6 +236,11 @@ export default function Contact() {
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Inquiry'} <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
                 </button>
+                {submissionError && (
+                  <p role="alert" aria-live="assertive" className="text-sm font-bold text-red-700">
+                    {submissionError}
+                  </p>
+                )}
               </form>
             )}
           </div>

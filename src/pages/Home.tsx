@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import Hero from '../components/Hero';
 import Services from '../components/Services';
@@ -7,8 +8,22 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Cpu, Leaf, Building2, TrendingUp } from 'lucide-react';
 import { JOURNAL_POSTS } from '../constants';
 import { SEOHead } from '../lib/seo';
+import OptimizedImage from '../components/OptimizedImage';
+import { journalService } from '../services/firebaseService';
 
 export default function Home() {
+  const [journalPosts, setJournalPosts] = useState(JOURNAL_POSTS);
+
+  useEffect(() => {
+    let active = true;
+    journalService.getAll().then((posts) => {
+      if (active) setJournalPosts(posts);
+    }).catch((error: unknown) => {
+      console.error('Unable to load journal previews; showing checked-in articles.', error);
+    });
+    return () => { active = false; };
+  }, []);
+
   return (
     <div className="bg-cream">
       <SEOHead
@@ -68,11 +83,12 @@ export default function Home() {
               transition={{ duration: 1 }}
               className="aspect-square bg-linen relative overflow-hidden"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=2000" 
-                alt="Construction Tech" 
-                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
-                referrerPolicy="no-referrer"
+              <OptimizedImage
+                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=2000"
+                alt="Construction technology and engineering"
+                aspectRatio="1/1"
+                className="w-full h-full"
+                imageClassName="grayscale hover:grayscale-0 transition-transform duration-1000"
               />
               <div className="absolute inset-0 bg-espresso/10" />
             </motion.div>
@@ -128,14 +144,15 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {JOURNAL_POSTS.map((post, i) => (
+            {journalPosts.map((post) => (
               <Link key={post.id} to={`/journal/${post.id}`} className="group space-y-8">
                 <div className="aspect-[16/9] overflow-hidden bg-linen relative">
-                  <img 
-                    src={post.image} 
-                    alt={post.title} 
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
-                    referrerPolicy="no-referrer"
+                  <OptimizedImage
+                    src={post.image}
+                    alt={post.title}
+                    aspectRatio="16/9"
+                    className="w-full h-full"
+                    imageClassName="grayscale group-hover:grayscale-0 group-hover:scale-110 transition-transform duration-1000"
                   />
                   <div className="absolute top-6 left-6 bg-cream px-4 py-2 text-[10px] uppercase tracking-widest font-bold text-espresso">
                     {post.category}
@@ -155,16 +172,12 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-32 px-6 md:px-12 bg-espresso text-cream overflow-hidden relative">
         <div className="absolute inset-0 opacity-20">
-          <video 
-            autoPlay 
-            muted 
-            loop 
-            playsInline
-            poster="https://images.unsplash.com/photo-1503387762-592dee58c460?auto=format&fit=crop&q=80&w=2000"
-            className="w-full h-full object-cover grayscale"
-          >
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-modern-city-skyline-with-skyscrapers-at-sunset-40012-large.mp4" type="video/mp4" />
-          </video>
+          <OptimizedImage
+            src="https://images.unsplash.com/photo-1503387762-592dee58c460?auto=format&fit=crop&q=80&w=2000"
+            alt=""
+            aspectRatio="16/9"
+            className="absolute inset-0 w-full h-full grayscale"
+          />
         </div>
         <div className="max-w-7xl mx-auto text-center space-y-12 relative z-10">
           <div className="space-y-6">

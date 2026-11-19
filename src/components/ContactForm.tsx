@@ -8,7 +8,7 @@ const ContactForm = () => {
     email: '',
     phone: '',
     companyName: '',
-    serviceType: 'Office Construction',
+    serviceType: 'Commercial',
     budget: '₹50L – ₹5Cr',
     location: '',
     message: ''
@@ -26,7 +26,7 @@ const ContactForm = () => {
         email: '', 
         phone: '', 
         companyName: '',
-        serviceType: 'Office Construction', 
+        serviceType: 'Commercial',
         budget: '₹50L – ₹5Cr',
         location: '',
         message: '' 
@@ -41,8 +41,9 @@ const ContactForm = () => {
     <form id="contact-form" onSubmit={handleSubmit} className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Full Name</label>
+          <label htmlFor="contact-name" className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Full Name</label>
           <input 
+            id="contact-name"
             required
             type="text" 
             placeholder="John Doe"
@@ -52,8 +53,9 @@ const ContactForm = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Email Address</label>
+          <label htmlFor="contact-email" className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Email Address</label>
           <input 
+            id="contact-email"
             required
             type="email" 
             placeholder="john@company.com"
@@ -65,8 +67,9 @@ const ContactForm = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Phone Number</label>
+          <label htmlFor="contact-phone" className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Phone Number</label>
           <input 
+            id="contact-phone"
             required
             type="tel" 
             placeholder="+91 00000 00000"
@@ -76,8 +79,9 @@ const ContactForm = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Company Name</label>
+          <label htmlFor="contact-company" className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Company Name</label>
           <input 
+            id="contact-company"
             required
             type="text" 
             placeholder="Enter your company"
@@ -89,22 +93,24 @@ const ContactForm = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Project Type</label>
+          <label htmlFor="contact-service" className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Project Type</label>
           <select 
+            id="contact-service"
             value={formData.serviceType}
             onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
             className="w-full bg-transparent border-b border-espresso/20 py-3 focus:border-gold outline-none transition-colors appearance-none text-espresso"
           >
-            <option>Office Construction</option>
+            <option value="Commercial">Commercial Build</option>
             <option>Infrastructure</option>
-            <option>Industrial Build</option>
-            <option>Renovation</option>
-            <option>Project Management</option>
+            <option value="Industrial">Industrial Facility</option>
+            <option value="Design">Architectural Design</option>
+            <option value="Consulting">Engineering Consulting</option>
           </select>
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Project Budget</label>
+          <label htmlFor="contact-budget" className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Project Budget</label>
           <select 
+            id="contact-budget"
             value={formData.budget}
             onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
             className="w-full bg-transparent border-b border-espresso/20 py-3 focus:border-gold outline-none transition-colors appearance-none text-espresso"
@@ -117,8 +123,9 @@ const ContactForm = () => {
         </div>
       </div>
       <div className="space-y-2">
-        <label className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Project Location</label>
+        <label htmlFor="contact-location" className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Project Location</label>
         <input 
+          id="contact-location"
           required
           type="text" 
           placeholder="e.g. Mumbai, Maharashtra"
@@ -128,8 +135,9 @@ const ContactForm = () => {
         />
       </div>
       <div className="space-y-2">
-        <label className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Message</label>
+        <label htmlFor="contact-message" className="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Message</label>
         <textarea 
+          id="contact-message"
           required
           rows={4} 
           placeholder="Tell us about your project requirements..."
@@ -158,7 +166,7 @@ const ContactForm = () => {
         )}
         
         {status === 'error' && (
-          <span className="text-red-500 text-xs uppercase tracking-widest font-bold">
+          <span role="alert" aria-live="assertive" className="text-red-700 text-xs uppercase tracking-widest font-bold">
             Submission failed. Please try again.
           </span>
         )}

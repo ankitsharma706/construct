@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Shield, Lock, Eye, FileText, CheckCircle2 } from 'lucide-react';
 import { SEOHead } from '../lib/seo';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { isConsentManagerConfigured, openConsentPreferences } from '../components/ConsentManager';
 
 export default function PrivacyPolicy() {
   return (
@@ -45,25 +46,25 @@ export default function PrivacyPolicy() {
               <h2 className="text-2xl font-serif text-espresso">2. Google AdSense & Third-Party Advertising Disclosures</h2>
             </div>
             <p>
-              We partner with Google AdSense and third-party advertising networks to serve advertisements when you visit our website. To comply strictly with Google AdSense Publisher Policies, we disclose the following operational parameters:
+              When advertising is enabled, Google and other advertising partners may use cookies or similar identifiers to serve and measure ads according to your consent choices and the applicable vendor settings.
             </p>
             <ul className="space-y-3 pl-4">
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={18} className="text-gold flex-shrink-0 mt-1" />
                 <span>
-                  <strong>Third-Party Vendors & Cookies:</strong> Third-party vendors, including Google, utilize cookies (such as the DoubleClick cookie) to serve ads based on your prior visits to this website or other websites across the Internet.
+                  <strong>Advertising cookies:</strong> Google and other vendors may process information using cookies or similar technologies. Personalized advertising is subject to your consent where required by law.
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={18} className="text-gold flex-shrink-0 mt-1" />
                 <span>
-                  <strong>Google DART Cookies:</strong> Google&rsquo;s use of advertising cookies enables it and its partners to serve targeted advertisements to our users based on their navigation patterns across our architectural case studies, technical whitepapers, and external web properties.
+                  <strong>Consent choices:</strong> When configured, Google Funding Choices presents and stores consent choices using the IAB Transparency and Consent Framework. Ads remain disabled until a valid CMP consent signal is available.
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 size={18} className="text-gold flex-shrink-0 mt-1" />
                 <span>
-                  <strong>User Opt-Out Mechanisms:</strong> Users may opt out of personalized advertising by visiting the official Google Ads Settings portal at{' '}
+                  <strong>Manage preferences:</strong> You can reopen the consent interface using the control below or opt out of personalized advertising through Google Ads Settings at{' '}
                   <a
                     href="https://adssettings.google.com"
                     target="_blank"
@@ -85,6 +86,15 @@ export default function PrivacyPolicy() {
                 </span>
               </li>
             </ul>
+            {isConsentManagerConfigured && (
+              <button
+                type="button"
+                onClick={openConsentPreferences}
+                className="border border-espresso/30 px-5 py-3 text-xs font-bold text-espresso hover:border-gold"
+              >
+                Manage cookie preferences
+              </button>
+            )}
           </section>
 
           {/* Section 3: Data Collection */}
@@ -141,4 +151,3 @@ export default function PrivacyPolicy() {
     </div>
   );
 }
-

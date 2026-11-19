@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Leaf, Recycle, Zap, Droplets } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 const SustainabilityCommitment = () => {
   const points = [
@@ -22,11 +23,12 @@ const SustainabilityCommitment = () => {
               transition={{ duration: 1 }}
               className="relative aspect-[4/5] bg-cream overflow-hidden shadow-2xl"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1449156001935-d2863fb72610?auto=format&fit=crop&q=80&w=1000" 
-                alt="Sustainable Infrastructure" 
-                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
-                referrerPolicy="no-referrer"
+              <OptimizedImage
+                src="https://images.unsplash.com/photo-1449156001935-d2863fb72610?auto=format&fit=crop&q=80&w=1000"
+                alt="Green building integrated with its surrounding landscape"
+                aspectRatio="4/5"
+                className="w-full h-full"
+                imageClassName="grayscale hover:grayscale-0 transition-transform duration-1000"
               />
               <div className="absolute bottom-0 left-0 w-full p-10 bg-gradient-to-t from-espresso/80 to-transparent">
                 <div className="text-emerald text-xs uppercase tracking-[0.3em] font-bold">Sustainability</div>
