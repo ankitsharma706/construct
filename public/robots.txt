@@ -16,6 +16,5 @@ Disallow: /admin
 Disallow: /login
 Disallow: /api/
 
-# Host and Sitemap
-Host: https://maxcnfront.vercel.app
+# Sitemap
 Sitemap: https://maxcnfront.vercel.app/sitemap.xml

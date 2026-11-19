@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import OptimizedImage from './OptimizedImage';
 
 const Philosophy = () => {
   const principles = [
@@ -20,11 +21,12 @@ const Philosophy = () => {
               transition={{ duration: 1 }}
               className="relative aspect-[4/5] bg-linen overflow-hidden shadow-2xl"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000" 
-                alt="Philosophy Architecture" 
-                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
-                referrerPolicy="no-referrer"
+              <OptimizedImage
+                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1000"
+                alt="Modern high-rise architecture"
+                aspectRatio="4/5"
+                className="w-full h-full"
+                imageClassName="grayscale hover:grayscale-0 transition-transform duration-1000"
               />
               <div className="absolute bottom-0 left-0 w-full p-10 bg-gradient-to-t from-espresso/80 to-transparent">
                 <div className="text-gold text-xs uppercase tracking-[0.3em] font-bold">Our Philosophy</div>

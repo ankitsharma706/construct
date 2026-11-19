@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import OptimizedImage from './OptimizedImage';
 import { ShieldCheck, ClipboardCheck, Eye, Award } from 'lucide-react';
 
 const QualitySafety = () => {
@@ -47,11 +48,12 @@ const QualitySafety = () => {
 
           <div className="order-1 lg:order-2 relative">
             <div className="aspect-square bg-linen relative overflow-hidden shadow-2xl">
-              <img 
-                src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=1000" 
-                alt="Safety on Site" 
-                className="w-full h-full object-cover grayscale"
-                referrerPolicy="no-referrer"
+              <OptimizedImage
+                src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=1000"
+                alt="Construction team following on-site safety procedures"
+                aspectRatio="1/1"
+                className="w-full h-full"
+                imageClassName="grayscale"
               />
               <div className="absolute inset-0 bg-espresso/20" />
             </div>

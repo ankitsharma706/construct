@@ -1,10 +1,23 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { PROJECTS } from '../constants';
+import { Project } from '../types';
+import { projectService } from '../services/firebaseService';
 import { Link } from 'react-router-dom';
 import { ArrowRight, MapPin, TrendingUp } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 export default function FeaturedProject() {
-  const project = PROJECTS[0];
+  const [project, setProject] = useState<Project | null>(PROJECTS[0]);
+
+  useEffect(() => projectService.subscribePublished((projects) => {
+    setProject(projects[0] || null);
+  }, (error) => {
+    console.error('Unable to load featured project; showing the checked-in project.', error);
+    setProject(PROJECTS[0] || null);
+  }), []);
+
+  if (!project) return null;
 
   return (
     <section className="py-32 px-6 md:px-12 bg-cream overflow-hidden">
@@ -31,11 +44,12 @@ export default function FeaturedProject() {
             className="lg:col-span-7 relative group"
           >
             <div className="aspect-[16/10] overflow-hidden bg-linen relative">
-              <img 
-                src={project.images[0]} 
-                alt={project.title} 
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
-                referrerPolicy="no-referrer"
+              <OptimizedImage
+                src={project.images[0]}
+                alt={project.title}
+                aspectRatio="16/10"
+                className="w-full h-full"
+                imageClassName="grayscale group-hover:grayscale-0 group-hover:scale-110 transition-transform duration-1000"
               />
               <div className="absolute inset-0 bg-espresso/10 group-hover:bg-transparent transition-all duration-1000" />
             </div>

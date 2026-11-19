@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PROJECTS } from '../constants';
 import { Project } from '../types';
@@ -9,11 +9,24 @@ import { useAuth } from '../context/AuthContext';
 import { SEOHead } from '../lib/seo';
 import Breadcrumbs from '../components/Breadcrumbs';
 import AdSenseSlot from '../components/AdSenseSlot';
+import OptimizedImage from '../components/OptimizedImage';
+import { projectService } from '../services/firebaseService';
 
 export default function ProjectList() {
   const { isAdmin } = useAuth();
   const [activeCategory, setActiveCategory] = useState('All');
-  const [projects] = useState<Project[]>(PROJECTS);
+  const [projects, setProjects] = useState<Project[]>(PROJECTS);
+
+  useEffect(() => {
+    let active = true;
+    projectService.getAll().then((publishedProjects) => {
+      if (!active) return;
+      setProjects(publishedProjects);
+    }).catch((error: unknown) => {
+      console.error('Unable to load published project records; showing the static portfolio.', error);
+    });
+    return () => { active = false; };
+  }, []);
 
   // Dynamically derive categories from actual projects to prevent zero-content empty views
   const categories = useMemo(() => {
@@ -119,10 +132,12 @@ export default function ProjectList() {
                 >
                   <Link to={`/projects/${project.id}`} className="group block space-y-8">
                     <div className="aspect-[3/4] overflow-hidden bg-linen relative shadow-xl group-hover:shadow-2xl transition-all duration-700">
-                      <img 
-                        src={project.images[0]} 
-                        alt={project.title} 
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                      <OptimizedImage
+                        src={project.images[0]}
+                        alt={project.title}
+                        aspectRatio="3/4"
+                        className="w-full h-full"
+                        imageClassName="grayscale group-hover:grayscale-0 group-hover:scale-105 transition-transform duration-700"
                       />
                       <div className="absolute top-6 left-6 bg-gold text-cream px-4 py-2 text-[8px] uppercase tracking-[0.3em] font-bold">
                         Case Study 0{i + 1}

@@ -1,53 +1,12 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // ===============================================================
-    // Assumed Data Model
-    // ===============================================================
-    //
-    // Collection: projects
-    // Fields:
-    //   - title: string (required, 1-100 chars)
-    //   - location: string (required, 1-100 chars)
-    //   - cost: string (required, 1-50 chars)
-    //   - area: string (optional, 1-50 chars)
-    //   - year: string (optional, 4 chars)
-    //   - description: string (required, 1-2000 chars)
-    //   - images: list (required, max 10 items)
-    //   - category: string (required, enum)
-    //   - createdAt: timestamp (required)
-    //   - updatedAt: timestamp (required)
-    //
-    // Collection: leads
-    // Fields:
-    //   - name: string (required, 1-100 chars)
-    //   - email: string (required, email format)
-    //   - phone: string (optional, 1-20 chars)
-    //   - budget: string (optional, 1-50 chars)
-    //   - serviceType: string (required, enum)
-    //   - message: string (required, 1-1000 chars)
-    //   - status: string (required, enum: new, contacted, closed)
-    //   - createdAt: timestamp (required)
-    //
-    // Collection: users
-    // Fields:
-    //   - email: string (required, email format)
-    //   - role: string (required, enum: admin, user)
-    //   - displayName: string (optional, 1-100 chars)
-    //
-    // ===============================================================
-
-    // ===============================================================
-    // Helper Functions
-    // ===============================================================
-    
     function isAuthenticated() {
       return request.auth != null;
     }
 
     function isAdmin() {
-      return isAuthenticated() && 
+      return isAuthenticated() &&
         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
          (request.auth.token.email == "ankitkumar999090@gmail.com" && request.auth.token.email_verified == true));
     }
@@ -64,57 +23,101 @@ service cloud.firestore {
       return request.resource.data.keys().hasAll(fields);
     }
 
-    // ===============================================================
-    // Domain Validators
-    // ===============================================================
-
     function isValidProject(data) {
+      let required = ['title', 'location', 'cost', 'description', 'images', 'category', 'createdAt', 'updatedAt'];
+      let allowed = [
+        'title', 'location', 'cost', 'area', 'year', 'description', 'images', 'category',
+        'modelUrl', 'technicalSpecs', 'materials', 'engineeringApproach', 'timeline',
+        'sustainabilityFeatures', 'sustainabilityResult', 'qualityMeasures', 'businessImpact',
+        'team', 'challenges', 'outcome', 'problem', 'solution', 'designStrategy',
+        'engineeringLogic', 'drawings', 'structuralModeling', 'beforeAfter',
+        'performanceMetrics', 'userExperience', 'impact', 'conclusion', 'client',
+        'process', 'spacePlanning', 'testimonial', 'sections', 'projectEmail', 'published',
+        'createdAt', 'updatedAt'
+      ];
       let allowedCategories = ['Commercial', 'Infrastructure', 'Industrial', 'Urban Development', 'Civic Infrastructure'];
-      return hasRequiredFields(['title', 'location', 'cost', 'description', 'images', 'category', 'createdAt', 'updatedAt']) &&
+      return hasOnlyAllowedFields(allowed) &&
+             hasRequiredFields(required) &&
              data.title is string && data.title.size() > 0 && data.title.size() <= 100 &&
              data.location is string && data.location.size() > 0 && data.location.size() <= 100 &&
              data.cost is string && data.cost.size() > 0 && data.cost.size() <= 50 &&
              data.description is string && data.description.size() > 0 && data.description.size() <= 2000 &&
-             data.images is list && data.images.size() <= 10 &&
+             data.images is list && data.images.size() > 0 && data.images.size() <= 10 &&
              data.category in allowedCategories &&
+             (!('published' in data) || data.published is bool) &&
              data.createdAt is timestamp &&
              data.updatedAt is timestamp;
     }
 
-    function isValidLead(data) {
-      let allowedStatuses = ['new', 'contacted', 'closed'];
-      let allowedServices = ['Commercial', 'Infrastructure', 'Industrial', 'Design', 'Consulting'];
-      return hasRequiredFields(['name', 'email', 'message', 'status', 'serviceType', 'createdAt']) &&
-             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
-             isValidEmail(data.email) &&
-             data.message is string && data.message.size() > 0 && data.message.size() <= 1000 &&
-             data.status in allowedStatuses &&
-             data.serviceType in allowedServices &&
+    function isValidJournalPost(data) {
+      let required = ['title', 'category', 'excerpt', 'date', 'author', 'image', 'readTime', 'sections', 'createdAt'];
+      let allowed = [
+        'title', 'category', 'excerpt', 'date', 'author', 'image', 'readTime', 'sections',
+        'insights', 'conclusion', 'gallery', 'technicalBrief', 'authorEmail', 'published', 'createdAt'
+      ];
+      return hasOnlyAllowedFields(allowed) &&
+             hasRequiredFields(required) &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 180 &&
+             data.category is string && data.category.size() > 0 && data.category.size() <= 80 &&
+             data.excerpt is string && data.excerpt.size() > 0 && data.excerpt.size() <= 1000 &&
+             data.date is string && data.author is string &&
+             data.image is string && data.readTime is string &&
+             data.sections is list && data.sections.size() > 0 &&
+             (!('published' in data) || data.published is bool) &&
              data.createdAt is timestamp;
     }
 
-    // ===============================================================
-    // Rules
-    // ===============================================================
+    function isValidLead(data) {
+      let allowedServices = ['Commercial', 'Infrastructure', 'Industrial', 'Design', 'Consulting'];
+      return hasOnlyAllowedFields(['name', 'email', 'phone', 'companyName', 'location', 'budget', 'serviceType', 'message', 'status', 'createdAt']) &&
+             hasRequiredFields(['name', 'email', 'message', 'status', 'serviceType', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             isValidEmail(data.email) &&
+             data.message is string && data.message.size() > 0 && data.message.size() <= 1000 &&
+             data.status in ['new', 'contacted', 'closed'] &&
+             data.serviceType in allowedServices &&
+             data.createdAt is timestamp &&
+             (!('phone' in data) || data.phone is string && data.phone.size() <= 30) &&
+             (!('companyName' in data) || data.companyName is string && data.companyName.size() <= 120) &&
+             (!('location' in data) || data.location is string && data.location.size() <= 120) &&
+             (!('budget' in data) || data.budget is string && data.budget.size() <= 80);
+    }
 
     match /projects/{projectId} {
-      allow read: if true;
+      allow read: if isAdmin() || resource.data.published == true;
       allow create: if isAdmin() && isValidProject(request.resource.data);
       allow update: if isAdmin() && isValidProject(request.resource.data);
       allow delete: if isAdmin();
     }
 
+    match /journal/{postId} {
+      allow read: if isAdmin() || resource.data.published == true;
+      allow create: if isAdmin() && isValidJournalPost(request.resource.data);
+      allow update: if isAdmin() && isValidJournalPost(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
     match /leads/{leadId} {
       allow read: if isAdmin();
-      allow create: if isValidLead(request.resource.data);
-      allow update: if isAdmin() && isValidLead(request.resource.data);
+      allow create: if isValidLead(request.resource.data) && request.resource.data.status == 'new';
+      allow update: if isAdmin() &&
+        isValidLead(request.resource.data) &&
+        request.resource.data.status in ['new', 'contacted', 'closed'];
       allow delete: if isAdmin();
     }
 
     match /users/{userId} {
       allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
-      allow create: if isAdmin();
-      allow update: if isAdmin();
+      allow create: if isAdmin() &&
+        hasOnlyAllowedFields(['email', 'role', 'displayName']) &&
+        hasRequiredFields(['email', 'role']) &&
+        isValidEmail(request.resource.data.email) &&
+        request.resource.data.role in ['admin', 'user'];
+      allow update: if isAdmin() &&
+        hasOnlyAllowedFields(['email', 'role', 'displayName']) &&
+        hasRequiredFields(['email', 'role']) &&
+        isValidEmail(request.resource.data.email) &&
+        request.resource.data.role in ['admin', 'user'];
       allow delete: if isAdmin();
     }
 

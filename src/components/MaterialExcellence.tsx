@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import OptimizedImage from './OptimizedImage';
 
 const MaterialExcellence = () => {
   const materials = [
@@ -16,10 +17,10 @@ const MaterialExcellence = () => {
           <div className="order-2 lg:order-1">
             <div className="grid grid-cols-2 gap-4">
               <div className="aspect-square bg-espresso/10 p-1 flex items-center justify-center">
-                <img src="https://images.unsplash.com/photo-1517581177682-a085bb7ffb15?auto=format&fit=crop&q=80&w=600" alt="Concrete Texture" className="w-full h-full object-cover grayscale" referrerPolicy="no-referrer" />
+                <OptimizedImage src="https://images.unsplash.com/photo-1517581177682-a085bb7ffb15?auto=format&fit=crop&q=80&w=600" alt="Concrete surface texture" aspectRatio="1/1" className="w-full h-full" imageClassName="grayscale" />
               </div>
               <div className="aspect-square bg-espresso/10 p-1 flex items-center justify-center mt-12">
-                <img src="https://images.unsplash.com/photo-1536895058696-a69b1c7ba34f?auto=format&fit=crop&q=80&w=600" alt="Steel Structure" className="w-full h-full object-cover grayscale" referrerPolicy="no-referrer" />
+                <OptimizedImage src="https://images.unsplash.com/photo-1536895058696-a69b1c7ba34f?auto=format&fit=crop&q=80&w=600" alt="Steel structural framing" aspectRatio="1/1" className="w-full h-full" imageClassName="grayscale" />
               </div>
             </div>
           </div>

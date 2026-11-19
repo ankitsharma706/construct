@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Instagram, Linkedin, Twitter, ShieldCheck } from 'lucide-react';
 import { SITE_CONFIG } from '../lib/seo';
+import { isConsentManagerConfigured, openConsentPreferences } from './ConsentManager';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -102,6 +103,11 @@ export default function Footer() {
             © {currentYear} CONSTRUCT INFRASTRUCTURE & STRUCTURAL ENGINEERING. ALL RIGHTS RESERVED.
           </p>
           <div className="flex flex-wrap gap-8 text-[11px] text-cream/50 uppercase tracking-widest">
+            {isConsentManagerConfigured && (
+              <button type="button" onClick={openConsentPreferences} className="hover:text-gold transition-colors">
+                Cookie preferences
+              </button>
+            )}
             <Link to="/privacy-policy" className="hover:text-gold transition-colors">
               Privacy Policy
             </Link>

@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { ShieldCheck, Award, Globe, Building2 } from 'lucide-react';
 import { SEOHead } from '../lib/seo';
 import Breadcrumbs from '../components/Breadcrumbs';
+import OptimizedImage from '../components/OptimizedImage';
 
 export default function About() {
   const containerRef = useRef(null);
@@ -205,10 +206,12 @@ export default function About() {
                   className="space-y-8 group"
                 >
                   <div className="aspect-[4/5] overflow-hidden bg-linen relative shadow-xl">
-                    <img 
-                      src={`https://images.unsplash.com/photo-${photoId[i-1]}?auto=format&fit=crop&q=80&w=1000`} 
-                      alt="Personnel" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000"
+                    <OptimizedImage
+                      src={`https://images.unsplash.com/photo-${photoId[i-1]}?auto=format&fit=crop&q=80&w=1000`}
+                      alt={`${names[i - 1]}, ${titles[i - 1]}`}
+                      aspectRatio="4/5"
+                      className="w-full h-full"
+                      imageClassName="group-hover:scale-105 transition-transform duration-1000"
                     />
                     <div className="absolute inset-0 bg-espresso/10 group-hover:bg-transparent transition-colors duration-700" />
                   </div>
@@ -236,9 +239,12 @@ export default function About() {
             <div ref={globalRef} className="h-[200vh] relative -mx-6 md:-mx-12 mb-40">
               <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
                 <motion.div style={{ scale: scaleBg }} className="absolute inset-0 z-0">
-                  <img 
-                    src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2400" 
-                    className="w-full h-full object-cover brightness-25"
+                  <OptimizedImage
+                    src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2400"
+                    alt=""
+                    aspectRatio="16/9"
+                    className="w-full h-full"
+                    imageClassName="brightness-25"
                   />
                   <div className="absolute inset-0 bg-espresso/60 mix-blend-multiply" />
                 </motion.div>

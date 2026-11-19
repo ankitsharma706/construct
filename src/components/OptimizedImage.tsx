@@ -8,6 +8,7 @@ interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> 
   aspectRatio?: string;
   priority?: boolean;
   className?: string;
+  imageClassName?: string;
 }
 
 export default function OptimizedImage({
@@ -18,6 +19,7 @@ export default function OptimizedImage({
   aspectRatio = '16/9',
   priority = false,
   className = '',
+  imageClassName = 'w-full h-full object-cover',
   ...props
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -42,10 +44,12 @@ export default function OptimizedImage({
       style={{
         aspectRatio: aspectRatio,
         width: width ? (typeof width === 'number' ? `${width}px` : width) : '100%',
-        height: height ? (typeof height === 'number' ? `${height}px` : height) : 'auto',
+        height: height ? (typeof height === 'number' ? `${height}px` : height) : undefined,
       }}
     >
       <img
+        width={width}
+        height={height}
         src={src}
         alt={alt}
         srcSet={srcSet}
@@ -53,7 +57,9 @@ export default function OptimizedImage({
         loading={priority ? 'eager' : 'lazy'}
         decoding={priority ? 'sync' : 'async'}
         onLoad={() => setIsLoaded(true)}
-        className={`w-full h-full object-cover transition-opacity duration-700 ${
+        onError={() => setIsLoaded(true)}
+        fetchPriority={priority ? 'high' : 'auto'}
+        className={`${imageClassName} transition-opacity duration-700 ${
           isLoaded ? 'opacity-100' : 'opacity-0'
         }`}
         {...props}
@@ -67,4 +73,3 @@ export default function OptimizedImage({
     </div>
   );
 }
-

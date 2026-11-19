@@ -1,8 +1,10 @@
 import { Suspense, lazy, useEffect } from 'react';
+import { MotionConfig } from 'motion/react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SmoothScroll from './components/SmoothScroll';
+import ConsentManager from './components/ConsentManager';
 import { useAdSenseRouteSync } from './lib/adGuard';
 
 // Lazy load core pages
@@ -43,14 +45,16 @@ function LoadingScreen() {
 
 export default function App() {
   return (
-    <Router>
-      <RouteController />
-      <SmoothScroll>
-        <div className="flex flex-col min-h-screen bg-cream">
-          <Navbar />
-          <main className="flex-grow">
-            <Suspense fallback={<LoadingScreen />}>
-              <Routes>
+    <MotionConfig reducedMotion="user">
+      <Router>
+        <ConsentManager />
+        <RouteController />
+        <SmoothScroll>
+          <div className="flex flex-col min-h-screen bg-cream">
+            <Navbar />
+            <main className="flex-grow">
+              <Suspense fallback={<LoadingScreen />}>
+                <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/projects" element={<ProjectList />} />
                 <Route path="/projects/:id" element={<ProjectPage />} />
@@ -72,12 +76,13 @@ export default function App() {
                 />
                 {/* 404 Catch-All Route */}
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </main>
-          <Footer />
-        </div>
-      </SmoothScroll>
-    </Router>
+                </Routes>
+              </Suspense>
+            </main>
+            <Footer />
+          </div>
+        </SmoothScroll>
+      </Router>
+    </MotionConfig>
   );
 }

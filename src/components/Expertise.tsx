@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import OptimizedImage from './OptimizedImage';
 
 const Expertise = () => {
   const team = [
@@ -38,7 +39,7 @@ const Expertise = () => {
           <div className="w-full lg:w-1/2 grid grid-cols-2 gap-4">
             <div className="space-y-4">
               <div className="aspect-[3/4] bg-espresso overflow-hidden grayscale">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600" alt="Team Member" className="w-full h-full object-cover opacity-80" referrerPolicy="no-referrer" />
+                <OptimizedImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600" alt="Engineering team member" aspectRatio="3/4" className="w-full h-full" imageClassName="opacity-80" />
               </div>
               <div className="aspect-square bg-gold/20 flex items-center justify-center p-8">
                 <p className="text-espresso font-serif italic text-center">"Precision is our primary language."</p>
@@ -47,7 +48,7 @@ const Expertise = () => {
             <div className="space-y-4 pt-12">
               <div className="aspect-square bg-linen border border-espresso/10" />
               <div className="aspect-[3/4] bg-espresso overflow-hidden grayscale">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600" alt="Team Member" className="w-full h-full object-cover opacity-80" referrerPolicy="no-referrer" />
+                <OptimizedImage src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600" alt="Engineering team member" aspectRatio="3/4" className="w-full h-full" imageClassName="opacity-80" />
               </div>
             </div>
           </div>

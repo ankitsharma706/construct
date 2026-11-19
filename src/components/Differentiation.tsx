@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2 } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 const Differentiation = () => {
   const points = [
@@ -43,11 +44,12 @@ const Differentiation = () => {
 
           <div className="relative">
             <div className="aspect-square bg-linen relative overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1503387762-592dee58c460?auto=format&fit=crop&q=80&w=1000" 
-                alt="Construction Site" 
-                className="w-full h-full object-cover grayscale"
-                referrerPolicy="no-referrer"
+              <OptimizedImage
+                src="https://images.unsplash.com/photo-1503387762-592dee58c460?auto=format&fit=crop&q=80&w=1000"
+                alt="Construction site"
+                aspectRatio="1/1"
+                className="w-full h-full"
+                imageClassName="grayscale"
               />
               <div className="absolute inset-0 bg-espresso/20" />
             </div>

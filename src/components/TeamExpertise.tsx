@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import OptimizedImage from './OptimizedImage';
 
 const TeamExpertise = () => {
   const roles = [
@@ -17,10 +18,10 @@ const TeamExpertise = () => {
           <div className="order-2 lg:order-1">
             <div className="grid grid-cols-2 gap-4">
               <div className="aspect-square bg-espresso/5 p-1 flex items-center justify-center">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600" alt="Expert" className="w-full h-full object-cover grayscale" referrerPolicy="no-referrer" />
+                <OptimizedImage src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600" alt="Structural engineering expert" aspectRatio="1/1" className="w-full h-full" imageClassName="grayscale" />
               </div>
               <div className="aspect-square bg-espresso/5 p-1 flex items-center justify-center mt-12">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600" alt="Expert" className="w-full h-full object-cover grayscale" referrerPolicy="no-referrer" />
+                <OptimizedImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600" alt="Construction project expert" aspectRatio="1/1" className="w-full h-full" imageClassName="grayscale" />
               </div>
             </div>
           </div>

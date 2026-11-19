@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export interface ProjectSection {
   title: string;
   subtitle?: string;
@@ -45,8 +47,9 @@ export interface Project {
   testimonial?: { quote: string; author: string; role: string };
   sections?: ProjectSection[];
   projectEmail?: string;
-  createdAt?: any;
-  updatedAt?: any;
+  published?: boolean;
+  createdAt?: Timestamp | Date | string;
+  updatedAt?: Timestamp | Date | string;
 }
 
 export interface ArticleSection {
@@ -73,7 +76,8 @@ export interface JournalPost {
     value: string;
   }[];
   authorEmail?: string;
-  createdAt?: any;
+  published?: boolean;
+  createdAt?: Timestamp | Date | string;
 }
 
 export interface ContactLead {
@@ -81,11 +85,13 @@ export interface ContactLead {
   name: string;
   email: string;
   phone: string;
+  companyName?: string;
+  location?: string;
   budget: string;
   serviceType: string;
   message: string;
   status: 'new' | 'contacted' | 'closed';
-  createdAt: any;
+  createdAt: Timestamp | Date | string;
 }
 
 export interface Service {

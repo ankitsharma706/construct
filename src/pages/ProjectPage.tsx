@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { PROJECTS } from '../constants';
 import { Project } from '../types';
-import ModelViewer from '../components/ModelViewer';
 import ProjectGallery from '../components/ProjectGallery';
 import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, ArrowRight, MapPin, Settings } from 'lucide-react';
@@ -11,11 +10,73 @@ import { SEOHead } from '../lib/seo';
 import Breadcrumbs from '../components/Breadcrumbs';
 import AdSenseSlot from '../components/AdSenseSlot';
 import RelatedContent from '../components/RelatedContent';
+import { projectService } from '../services/firebaseService';
+import OptimizedImage from '../components/OptimizedImage';
+
+const ModelViewer = lazy(() => import('../components/ModelViewer'));
+
+function DeferredModelViewer({ url }: { url: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    if (!('IntersectionObserver' in window)) {
+      setShouldLoad(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setShouldLoad(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '200px' });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={containerRef} className="w-full h-full min-h-64">
+      {shouldLoad ? (
+        <Suspense fallback={<div className="h-full min-h-64" role="status">Loading 3D model…</div>}>
+          <ModelViewer url={url} />
+        </Suspense>
+      ) : (
+        <div className="h-full min-h-64" role="status">3D model loads when this section is near the viewport.</div>
+      )}
+    </div>
+  );
+}
 
 export default function ProjectPage() {
   const { id } = useParams();
   const { isAdmin } = useAuth();
-  const [project] = useState<Project | null>(PROJECTS.find(p => p.id === id) || null);
+  const [project, setProject] = useState<Project | null>(() => PROJECTS.find((item) => item.id === id) || null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setProject(PROJECTS.find((item) => item.id === id) || null);
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
+    projectService.getById(id).then((record) => {
+      if (active) setProject(record);
+    }).catch((error: unknown) => {
+      console.error(`Unable to load project ${id}.`, error);
+    }).finally(() => {
+      if (active) setLoading(false);
+    });
+    return () => { active = false; };
+  }, [id]);
+
+  if (loading && !project) {
+    return <div className="min-h-screen flex items-center justify-center bg-cream" role="status">Loading project…</div>;
+  }
 
   if (!project) {
     return (
@@ -173,7 +234,7 @@ export default function ProjectPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {section.images.map((img, i) => (
                         <div key={i} className="aspect-[4/3] bg-linen overflow-hidden shadow-lg border border-espresso/5">
-                          <img src={img} alt={`${section.title} ${i + 1}`} className="w-full h-full object-cover" />
+                          <OptimizedImage src={img} alt={`${section.title} ${i + 1}`} aspectRatio="4/3" className="w-full h-full" />
                         </div>
                       ))}
                     </div>
@@ -193,7 +254,7 @@ export default function ProjectPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {section.images.map((img, i) => (
                         <div key={i} className="aspect-[16/9] bg-linen overflow-hidden shadow-lg border border-espresso/5">
-                          <img src={img} alt={`${section.title} ${i + 1}`} className="w-full h-full object-cover" />
+                          <OptimizedImage src={img} alt={`${section.title} ${i + 1}`} aspectRatio="16/9" className="w-full h-full" />
                         </div>
                       ))}
                     </div>
@@ -210,7 +271,7 @@ export default function ProjectPage() {
                     )}
                   </div>
                   <div className="aspect-video bg-linen border border-espresso/10 relative shadow-2xl">
-                    {project.modelUrl && <ModelViewer url={project.modelUrl} />}
+                    {project.modelUrl && <DeferredModelViewer url={project.modelUrl} />}
                   </div>
                 </div>
               )}
